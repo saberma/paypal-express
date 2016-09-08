@@ -2,6 +2,7 @@ module Paypal
   module Payment
     class Request < Base
       attr_optional :action, :currency_code, :description, :notify_url, :billing_type, :billing_agreement_description, :billing_agreement_id, :request_id, :seller_id, :invoice_number, :custom
+      attr_optional :dependent_in_amt_and_quantity
       attr_accessor :amount, :items, :custom_fields
 
       def initialize(attributes = {})
@@ -58,8 +59,10 @@ module Paypal
       end
 
       def items_amount
-        self.items.sum do |item|
-          BigDecimal.new(item.amount.to_s) * BigDecimal.new(item.quantity.to_s)
+        if dependent_in_amt_and_quantity && dependent_in_amt_and_quantity == true
+          self.items.sum { |item| BigDecimal.new(item.amount.to_s) }
+        else
+          self.items.sum { |item| (BigDecimal.new(item.amount.to_s) * BigDecimal.new(item.quantity.to_s)) }
         end
       end
     end

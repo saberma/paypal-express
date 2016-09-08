@@ -115,22 +115,30 @@ describe Paypal::Payment::Request do
   end
 
   describe '#items_amount' do
-    context 'when BigDecimal'
-    let(:instance) do
-      Paypal::Payment::Request.new(
-        :items => [{
-          :quantity => 3,
-          :name => 'Item1',
-          :description => 'Awesome Item 1!',
-          :amount => 130.45
-        }]
-      )
+    let(:items) do
+      [{ :quantity => 3, :name => 'Item1', :description => 'Awesome Item 1!', :amount => 130.45 }]
     end
 
-    # NOTE:
-    # 130.45 * 3 => 391.34999999999997 (in ruby 1.9)
-    it 'should calculate total amount correctly' do
-      instance.items_amount.should == 391.35
+    context 'when BigDecimal' do 
+      let(:instance) do
+        Paypal::Payment::Request.new(:items => items)
+      end
+
+      # NOTE:
+      # 130.45 * 3 => 391.34999999999997 (in ruby 1.9)
+      it 'should calculate total amount correctly' do
+        instance.items_amount.should == 391.35
+      end
+    end
+
+    context 'when dependent_in_amt_and_quantity' do
+      let(:instance) do
+        Paypal::Payment::Request.new(:items => items, :dependent_in_amt_and_quantity => true)
+      end
+
+      it 'should calculate total amount correctly' do
+        instance.items_amount.should == 130.45
+      end
     end
   end
 end
