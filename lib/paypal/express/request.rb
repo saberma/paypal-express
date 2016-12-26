@@ -10,9 +10,26 @@ module Paypal
           :CANCELURL => cancel_url,
           :version   => Paypal.api_version
         }
-        if options[:no_shipping]
-          params[:REQCONFIRMSHIPPING] = 0
-          params[:NOSHIPPING] = 1
+
+        # Indicates whether or not you require the buyer's shipping address on file with PayPal
+        # be a confirmed address. For digital goods, this field is required, and you must set
+        # it to 0. It is one of the following values:
+        #
+        # 0 — You do not require the buyer's shipping address be a confirmed address.
+        # 1 — You require the buyer's shipping address be a confirmed address.
+        if options[:req_confirm_shipping].present?
+          params[:REQCONFIRMSHIPPING] = options[:req_confirm_shipping]
+        end
+
+        # Determines whether PayPal displays shipping address fields on the PayPal pages.
+        # For digital goods, this field is required, and you must set it to 1.
+        # It is one of the following values:
+        # 
+        # 0 — PayPal displays the shipping address on the PayPal pages.
+        # 1 — PayPal does not display shipping address fields and removes shipping information from the transaction.
+        # 2 — If you do not pass the shipping address, PayPal obtains it from the buyer's account profile.
+        if options[:no_shipping].present?
+          params[:NOSHIPPING] = options[:no_shipping]
         end
 
         params[:ALLOWNOTE] = 0 if options[:allow_note] == false
