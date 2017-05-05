@@ -6,8 +6,6 @@ module Paypal
       attr_optional :environment
       attr_accessor :version
 
-      PRODUCTION_ENVIRONMENT = :production
-
       ENDPOINT = {
         :production => 'https://api-3t.paypal.com/nvp',
         :sandbox => 'https://api-3t.sandbox.paypal.com/nvp'
@@ -15,7 +13,7 @@ module Paypal
 
       def self.endpoint(_env = nil)
         if _env
-          _env == PRODUCTION_ENVIRONMENT ? ENDPOINT[:production] : ENDPOINT[:sandbox]
+          %w(production live).include?(_env.to_s) ? ENDPOINT[:production] : ENDPOINT[:sandbox]
         else
           Paypal.sandbox? ? ENDPOINT[:sandbox] : ENDPOINT[:production]
         end
