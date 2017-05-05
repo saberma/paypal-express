@@ -3,9 +3,9 @@ require 'spec_helper.rb'
 describe Paypal::NVP::Request do
   let :attributes do
     {
-      :username => 'nov',
-      :password => 'password',
-      :signature => 'sig'
+      username: 'nov',
+      password: 'password',
+      signature: 'sig'
     }
   end
 
@@ -17,7 +17,7 @@ describe Paypal::NVP::Request do
     context 'when any required parameters are missing' do
       it 'should raise AttrRequired::AttrMissing' do
         attributes.keys.each do |missing_key|
-          insufficient_attributes = attributes.reject do |key, value|
+          insufficient_attributes = attributes.reject do |key, _value|
             key == missing_key
           end
           expect do
@@ -49,7 +49,7 @@ describe Paypal::NVP::Request do
 
     context 'when optional parameters are given' do
       let(:optional_attributes) do
-        { :subject => 'user@example.com' }
+        { subject: 'user@example.com' }
       end
 
       it 'should setup subject' do
@@ -57,15 +57,36 @@ describe Paypal::NVP::Request do
         client.subject.should == 'user@example.com'
       end
     end
+
+    context 'when the environment optional parameter is production' do
+      before do
+        attributes[:environment] = :production
+      end
+
+      it 'should use production endpoint' do
+        client = Paypal::NVP::Request.new(attributes)
+        client.endpoint.should == Paypal::NVP::Request::ENDPOINT[:production]
+      end
+    end
+
+    context 'when the environment optional parameter is not production' do
+      before do
+        attributes[:environment] = :sandbox
+      end
+
+      it 'should use production endpoint' do
+        client = Paypal::NVP::Request.new(attributes)
+        client.endpoint.should == Paypal::NVP::Request::ENDPOINT[:sandbox]
+      end
+    end
   end
 
   describe '#common_params' do
     {
-      :username => :USER,
-      :password => :PWD,
-      :signature => :SIGNATURE,
-      :subject => :SUBJECT,
-      :version => :VERSION
+      username: :USER,
+      password: :PWD,
+      signature: :SIGNATURE,
+      version: :VERSION
     }.each do |option_key, param_key|
       it "should include :#{param_key}" do
         instance.common_params.should include(param_key)
@@ -101,8 +122,8 @@ describe Paypal::NVP::Request do
         FakeWeb.register_uri(
           :post,
           Paypal::NVP::Request::ENDPOINT[:production],
-          :body => "Invalid Request",
-          :status => ["400", "Bad Request"]
+          body: 'Invalid Request',
+          status: ['400', 'Bad Request']
         )
       end
 
